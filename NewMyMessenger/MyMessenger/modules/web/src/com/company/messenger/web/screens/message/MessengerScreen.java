@@ -22,6 +22,10 @@ public class MessengerScreen extends Screen {
     @Inject
     private CollectionLoader<Message> messagesDl;
     @Inject
+    private CollectionLoader<MyUser> usersDl;
+
+
+    @Inject
     private GroupTable<User> userTable;
     @Inject
     private TextArea messageText;
@@ -35,19 +39,20 @@ public class MessengerScreen extends Screen {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        usersDl.setParameter("anonymous", "anonymous");
         userSender = userSessionSource.getUserSession().getUser();
         messagesDl.addPreLoadListener(e -> {
             if(userTable.getSelected().isEmpty()) {
                 e.preventLoad();
             }
         });
+        messagesDl.setParameter("user", userSender);
         userTable.addSelectionListener(userSelectionEvent -> {
             userTable.getSelected().stream()
                     .findFirst()
                     .ifPresent(user -> {
                         recipientLogin = user.getLogin();
                         login.setValue(recipientLogin);
-                        messagesDl.setParameter("user", userSender);
                         messagesDl.setParameter("login", recipientLogin);
                         messagesDl.load();
                     });

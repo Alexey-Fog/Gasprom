@@ -8,11 +8,10 @@
                     class="com.company.messenger.entity.MyUser">
             <loader id="usersDl">
                 <query>
-                    <!--                    <![CDATA[select u from sec$User u]]> -->
                     <![CDATA[select u from MyMessenger_MyUser u]]>
                     <condition>
                         <c:jpql>
-                            <c:where>u.login not like anonymous</c:where>
+                            <c:where>u.login not like :anonymous</c:where>
                         </c:jpql>
                     </condition>
                 </query>
@@ -33,7 +32,7 @@
                                     <c:where>e.sender = :user</c:where>
                                 </c:jpql>
                                 <c:jpql>
-                                    <c:where>e.recipient.login = :login</c:where>
+                                    <c:where>e.recipient.login like :login</c:where>
                                 </c:jpql>
                             </and>
                             <and>
@@ -41,7 +40,7 @@
                                     <c:where>e.recipient = :user</c:where>
                                 </c:jpql>
                                 <c:jpql>
-                                    <c:where>e.sender.login = :login</c:where>
+                                    <c:where>e.sender.login like :login</c:where>
                                 </c:jpql>
                             </and>
                         </or>
