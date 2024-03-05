@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://messengerScreen.caption"
+        messagesPack="com.company.messenger.web.screens.message">
+    <data readOnly="true">
+        <collection id="usersDc"
+                    class="com.company.messenger.entity.MyUser">
+            <loader id="usersDl">
+                <query>
+                    <!--                    <![CDATA[select u from sec$User u]]> -->
+                    <![CDATA[select u from MyMessenger_MyUser u]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>u.login not like anonymous</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="messagesDc"
+                    class="com.company.messenger.entity.Message">
+            <view extends="_local">
+                <property name="recipient" view="_minimal"/>
+                <property name="sender" view="_minimal"/>
+            </view>
+            <loader id="messagesDl">
+                <query><![CDATA[select e from MyMessenger_Message e order by e.dateTime]]>
+                    <condition>
+                        <or>
+                            <and>
+                                <c:jpql>
+                                    <c:where>e.sender = :user</c:where>
+                                </c:jpql>
+                                <c:jpql>
+                                    <c:where>e.recipient.login = :login</c:where>
+                                </c:jpql>
+                            </and>
+                            <and>
+                                <c:jpql>
+                                    <c:where>e.recipient = :user</c:where>
+                                </c:jpql>
+                                <c:jpql>
+                                    <c:where>e.sender.login = :login</c:where>
+                                </c:jpql>
+                            </and>
+                        </or>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <instance id="messageDc"
+                  class="com.company.messenger.entity.Message">
+            <view extends="_local">
+                <property name="sender" view="_minimal"/>
+            </view>
+            <loader/>
+        </instance>
+    </data>
+    <actions>
+        <action id="save" icon="icons/ok.png" caption="mainMsg://actions.Send" shortcut="CTRL-ENTER"/>
+    </actions>
+    <dialogMode height="600" width="800"/>
+    <layout>
+        <split id="split1" height="100%" orientation="horizontal" reversePosition="true" width="100%">
+            <vbox id="lookupBox" height="100%" margin="false,true,false,false" expand="userTable" spacing="true">
+                <filter id="userFilter" applyTo="userTable" dataLoader="usersDl">
+                    <properties include=".*"/>
+                </filter>
+                <groupTable id="userTable"
+                            width="100%"
+                            dataContainer="usersDc">
+                    <columns>
+                        <column id="login"/>
+                        <column id="name"/>
+                        <column id="lastTimeOnline"/>
+                    </columns>
+                    <rowsCount/>
+                </groupTable>
+            </vbox>
+            <vbox id="editBox" height="100%" margin="false,false,false,true" expand="messagesTable" spacing="true">
+                <hbox width="100%" expand="login" spacing="true">
+                    <label id="login" height="100%" value="User: no info"/>
+                    <label id="lastTimeOnline" height="100%" value="Last time online: no info"/>
+                </hbox>
+                <filter id="messageFilter" applyTo="messagesTable" dataLoader="messagesDl">
+                    <properties include=".*"/>
+                </filter>
+                <groupTable id="messagesTable"
+                            width="100%"
+                            dataContainer="messagesDc">
+                    <columns>
+                        <column id="sender" caption="msg://sender"/>
+                        <column id="message" caption="msg://message"/>
+                        <column id="dateTime" caption="msg://dateTime"/>
+                    </columns>
+                    <rowsCount/>
+                </groupTable>
+                <vbox stylename="well"
+                      height="100px"
+                      width="100%"
+                      expand="messageText"
+                      spacing="false">
+                    <textArea id="messageText"
+                              inputPrompt="Enter your message here..."
+                              width="100%"/>
+                    <button id="saveBtn"
+                            caption="Send message"
+                            width="100%"
+                            height="30"/>
+                </vbox>
+            </vbox>
+        </split>
+    </layout>
+</window>
